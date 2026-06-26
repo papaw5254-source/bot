@@ -23,13 +23,32 @@ function dbConfig(): TypeOrmModuleOptions {
   const isProd = process.env.NODE_ENV === 'production';
   const ssl = isProd ? { rejectUnauthorized: false } : false;
   const entities = [__dirname + '/**/*.entity{.ts,.js}'];
-  const rawUrl = (process.env.DATABASE_URL || '').trim();
 
-  if (rawUrl) {
-    console.log(`[DB] URL uzunlik=${rawUrl.length} boshi="${rawUrl.slice(0, 40)}"`);
+  // 1. Individual PG variables (Railway reference variables)
+  const pgHost = process.env.PGHOST || process.env.DB_HOST;
+  if (pgHost) {
+    const cfg = {
+      type: 'postgres' as const,
+      host: pgHost,
+      port: parseInt(process.env.PGPORT || process.env.DB_PORT || '5432', 10),
+      username: process.env.PGUSER || process.env.DB_USERNAME || 'postgres',
+      password: process.env.PGPASSWORD || process.env.DB_PASSWORD || 'postgres',
+      database: process.env.PGDATABASE || process.env.DB_DATABASE || 'railway',
+      entities,
+      synchronize: true,
+      logging: false,
+      ssl,
+    };
+    console.log(`[DB] PGHOST: ${cfg.host}:${cfg.port}/${cfg.database}`);
+    return cfg;
+  }
+
+  // 2. DATABASE_URL (only if looks valid)
+  const rawUrl = (process.env.DATABASE_URL || '').trim();
+  if (rawUrl && rawUrl.length > 20 && rawUrl.includes('@')) {
+    console.log(`[DB] DATABASE_URL: ${rawUrl.slice(0, 30)}...`);
     try {
       const u = new URL(rawUrl);
-      console.log(`[DB] Ulash: host=${u.hostname} port=${u.port} db=${u.pathname}`);
       return {
         type: 'postgres',
         host: u.hostname,
@@ -42,24 +61,23 @@ function dbConfig(): TypeOrmModuleOptions {
         logging: false,
         ssl,
       };
-    } catch (e) {
-      console.error(`[DB] new URL() xato: ${(e as Error).message} — url prop ishlatiladi`);
-      return { type: 'postgres', url: rawUrl, entities, synchronize: true, logging: false, ssl };
+    } catch {
+      console.error('[DB] URL parse xato');
     }
   }
 
-  console.log('[DB] DATABASE_URL yoq — localhost fallback');
+  console.log('[DB] localhost fallback');
   return {
     type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_DATABASE || 'marvarid_restaurant',
+    host: 'localhost',
+    port: 5432,
+    username: 'postgres',
+    password: 'postgres',
+    database: 'marvarid_restaurant',
     entities,
     synchronize: true,
     logging: false,
-    ssl,
+    ssl: false,
   };
 }
 
