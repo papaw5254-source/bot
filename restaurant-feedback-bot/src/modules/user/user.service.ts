@@ -12,16 +12,18 @@ export class UserService {
   ) {}
 
   async topOrCreate(dto: CreateUserDto): Promise<User> {
-    let user = await this.userRepo.findOne({
+    await this.userRepo.upsert(
+      {
+        telegramId: dto.telegramId,
+        username: dto.username ?? undefined,
+        firstName: dto.firstName,
+        lastName: dto.lastName ?? undefined,
+      },
+      { conflictPaths: ['telegramId'], skipUpdateIfNoValuesChanged: true },
+    );
+    return (await this.userRepo.findOne({
       where: { telegramId: dto.telegramId },
-    });
-
-    if (!user) {
-      user = this.userRepo.create(dto);
-      await this.userRepo.save(user);
-    }
-
-    return user;
+    }))!;
   }
 
   async telegramIdByTopish(telegramId: number): Promise<User | null> {

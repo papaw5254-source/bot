@@ -17,8 +17,10 @@ export const reytingKlavyaturasi = () =>
 
 export const xodimlarKlavyaturasi = () =>
   Markup.keyboard([
-    ['👨‍🍳 Amirxon', '👨‍🍳 Yusufboy'],
-    ['👨‍🍳 Ortiqvoy', '👩‍💼 Xalima'],
+    ['👩‍💼 Administrator — Xalima'],
+    ['👨‍🍳 Ofitsiant — Amirxon', '👨‍🍳 Ofitsiant — Dilafruz'],
+    ['👨‍🍳 Ofitsiant — Ortiqboy', '👨‍🍳 Ofitsiant — Mansur'],
+    ['👨‍🍳 Ofitsiant — Yusufboy'],
     ['🍽 Taom sifati'],
     ['❌ Bekor qilish'],
   ]).resize();
