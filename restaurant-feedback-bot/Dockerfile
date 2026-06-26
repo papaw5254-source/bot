@@ -1,15 +1,13 @@
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
-COPY . .
-RUN npm run build
-RUN npm prune --production
-
 FROM node:20-alpine
 WORKDIR /app
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY package.json ./
+
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
+COPY nest-cli.json tsconfig*.json ./
+COPY src/ ./src/
+
+RUN npm run build && npm prune --production
+
 EXPOSE 3000
 CMD ["node", "dist/main"]
