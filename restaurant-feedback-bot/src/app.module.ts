@@ -25,7 +25,7 @@ function dbConfig(): TypeOrmModuleOptions {
   const entities = [__dirname + '/**/*.entity{.ts,.js}'];
 
   // 1. Individual PG variables (Railway reference variables)
-  const pgHost = process.env.PGHOST || process.env.DB_HOST;
+  const pgHost = (process.env.PGHOST || process.env.DB_HOST || '').trim();
   if (pgHost) {
     const cfg = {
       type: 'postgres' as const,
