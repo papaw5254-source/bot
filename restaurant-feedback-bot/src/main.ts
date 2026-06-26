@@ -6,6 +6,9 @@ import { execSync } from 'child_process';
 
 const logger = new Logger('Bootstrap');
 
+// DB ulanish manbasi: DATABASE_URL > individual vars
+logger.log('DB: ' + (process.env.DATABASE_URL ? 'DATABASE_URL mavjud' : 'localhost fallback'));
+
 function portniTozala(port: number) {
   try {
     const natija = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf8' });
