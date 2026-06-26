@@ -23,11 +23,13 @@ function dbConfig(): TypeOrmModuleOptions {
   const isProd = process.env.NODE_ENV === 'production';
   const ssl = isProd ? { rejectUnauthorized: false } : false;
   const entities = [__dirname + '/**/*.entity{.ts,.js}'];
+  const rawUrl = (process.env.DATABASE_URL || '').trim();
 
-  const rawUrl = process.env.DATABASE_URL;
   if (rawUrl) {
+    console.log(`[DB] URL uzunlik=${rawUrl.length} boshi="${rawUrl.slice(0, 40)}"`);
     try {
       const u = new URL(rawUrl);
+      console.log(`[DB] Ulash: host=${u.hostname} port=${u.port} db=${u.pathname}`);
       return {
         type: 'postgres',
         host: u.hostname,
@@ -40,9 +42,13 @@ function dbConfig(): TypeOrmModuleOptions {
         logging: false,
         ssl,
       };
-    } catch { /* URL parse failed, fallback */ }
+    } catch (e) {
+      console.error(`[DB] new URL() xato: ${(e as Error).message} — url prop ishlatiladi`);
+      return { type: 'postgres', url: rawUrl, entities, synchronize: true, logging: false, ssl };
+    }
   }
 
+  console.log('[DB] DATABASE_URL yoq — localhost fallback');
   return {
     type: 'postgres',
     host: process.env.DB_HOST || 'localhost',
