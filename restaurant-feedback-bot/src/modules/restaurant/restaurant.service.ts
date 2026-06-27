@@ -53,6 +53,20 @@ export class RestaurantService {
     return this.restaurantRepo.save(restoran);
   }
 
+  async asosiyRestoranTayyorla(): Promise<void> {
+    const bor = await this.restaurantRepo.findOne({ where: { id: 1 } });
+    if (!bor) {
+      await this.restaurantRepo.save(
+        this.restaurantRepo.create({
+          name: 'Marvarid Restaurant',
+          address: 'Toshkent',
+          phone: '+998901234567',
+          isActive: true,
+        }),
+      );
+    }
+  }
+
   async statistikaTopish(id: number): Promise<{
     jamiFeedback: number;
     ortachaReyting: number;

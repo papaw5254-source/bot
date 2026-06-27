@@ -10,6 +10,7 @@ export function escHtml(s: string): string {
 import { UserService } from '../user/user.service';
 import { FeedbackService } from '../feedback/feedback.service';
 import { ReportService } from '../report/report.service';
+import { RestaurantService } from '../restaurant/restaurant.service';
 import { feedbackSahnaYaratish, FEEDBACK_SAHNA_NOMI } from './scenes/feedback.scene';
 import { asosiyKlavyatura } from './keyboards/main.keyboard';
 
@@ -25,6 +26,7 @@ export class BotService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly feedbackService: FeedbackService,
+    private readonly restaurantService: RestaurantService,
     @Inject(forwardRef(() => ReportService))
     private readonly reportService: ReportService,
   ) {}
@@ -35,6 +37,7 @@ export class BotService implements OnModuleInit {
       this.logger.warn('BOT_TOKEN topilmadi, bot ishga tushmadi');
       return;
     }
+    await this.restaurantService.asosiyRestoranTayyorla();
     this.adminTelegramId = this.configService.get<number>('bot.adminTelegramId') || 0;
     this.bot = new Telegraf(token);
     this.sahnalarniSozlash();
