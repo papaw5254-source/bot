@@ -128,7 +128,7 @@ export function feedbackSahnaYaratish(
       );
     }
 
-    // 2. Reyting — baholash yakunlanadi
+    // 2. Reyting
     if (sessiya.qadam === 'reyting') {
       const reyting = REYTING_MAP[matn];
       if (!reyting) {
@@ -138,7 +138,23 @@ export function feedbackSahnaYaratish(
         );
       }
       sessiya.reyting = reyting;
-      await saqlashVaYuborish(ctx, sessiya, undefined, feedbackService, userService, adminGaXabar);
+      sessiya.qadam = 'izoh';
+
+      const emoji = reyting <= 2 ? '😞' : reyting === 3 ? '🙂' : reyting === 4 ? '😊' : '🤩';
+      return ctx.reply(
+        `${'⭐'.repeat(reyting)} ${emoji} <b>Baho qabul qilindi</b>\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `✍️ <b>Izoh qoldiring:</b>`,
+        { ...HTML, ...BEKOR_KLAVYATURA },
+      );
+    }
+
+    // 3. Izoh — yakunlanadi
+    if (sessiya.qadam === 'izoh') {
+      if (matn.trim().length < 3) {
+        return ctx.reply(`⚠️ Izoh juda qisqa, iltimos yozing:`, HTML);
+      }
+      await saqlashVaYuborish(ctx, sessiya, matn.trim(), feedbackService, userService, adminGaXabar);
       return;
     }
   });
