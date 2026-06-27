@@ -189,28 +189,31 @@ export class ReportService {
       xabar += `\n\n📂 <b>Kategoriyalar:</b>\n<code>${kategoriyalar.join('\n')}</code>`;
     }
 
+    // Xodimlar reytingi va bonus tizimi
     if (xodimlar.length > 0) {
-      xabar += `\n\n👨‍🍳 <b>Xodimlar reytingi</b>\n<i>Oylik bonus hisoblash uchun</i>\n`;
+      xabar += `\n\n👨‍🍳 <b>Xodimlar reytingi</b>\n`;
 
       xodimlar.forEach((x, i) => {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
-        const bonus =
-          x.ortacha >= 4.5 ? '💰 Bonus — tavsiya etiladi!' :
-          x.ortacha >= 4.0 ? '👍 Yaxshi natija' :
-          x.ortacha >= 3.0 ? '⚠️ Yaxshilash kerak' :
-                              '❌ E\'tibor bering';
+        const { daraja } = bonusDaraja(x.ortacha, x.ijobiy);
 
         xabar +=
           `\n${medal} <b>${esc(x.ismi)}</b>\n` +
           `   ${yulduzKorsatish(x.ortacha)}  <b>${x.ortacha.toFixed(1)}</b> / 5.0\n` +
           `   📊 ${x.soni} ta baho  ·  ✅ ${x.ijobiy}% ijobiy\n` +
-          `   ${bonus}\n`;
+          `   ${daraja}\n`;
       });
 
+      // Bonus g'olibi kartasi
       const eng = xodimlar[0];
+      const { emoji, daraja, bonus } = bonusDaraja(eng.ortacha, eng.ijobiy);
+
       xabar +=
-        `\n🏆 <b>Oy championi: ${esc(eng.ismi)}</b>\n` +
-        `   ⭐ ${eng.ortacha.toFixed(1)} baho  ·  ${eng.soni} ta sharh`;
+        `\n\n${emoji} <b>${oyNomi.toUpperCase()} — OY G'OLIBI</b>\n\n` +
+        `🏆 <b>${esc(eng.ismi)}</b>\n` +
+        `   ⭐ <b>${eng.ortacha.toFixed(1)} / 5.0</b>\n` +
+        `   📊 ${eng.soni} ta baho  ·  ${eng.ijobiy}% ijobiy\n\n` +
+        `${bonus}`;
     }
 
     const pastlar = fikrlar.filter((f) => f.rating <= 3 && f.comment).slice(0, 5);
@@ -256,6 +259,47 @@ interface XodimStat {
   ortacha: number;
   soni: number;
   ijobiy: number;
+}
+
+function bonusDaraja(ortacha: number, ijobiy: number): { emoji: string; daraja: string; bonus: string } {
+  if (ortacha >= 4.5 && ijobiy >= 85) {
+    return {
+      emoji: '🏅',
+      daraja: '💰 Bonus — tavsiya etiladi!',
+      bonus:
+        `💰 <b>BONUS BERILSIN!</b>\n` +
+        `<i>Oy davomida a'lo darajada ishladi.\n` +
+        `Mehmonlar undan juda mamnun!</i>`,
+    };
+  }
+  if (ortacha >= 4.0 && ijobiy >= 70) {
+    return {
+      emoji: '🌟',
+      daraja: '👍 Yaxshi natija',
+      bonus:
+        `👍 <b>YAXSHI ISHLADI</b>\n` +
+        `<i>Oy natijasi yaxshi. Bonus qaror qabul\n` +
+        `qiluvchiga havola etiladi.</i>`,
+    };
+  }
+  if (ortacha >= 3.0) {
+    return {
+      emoji: '📊',
+      daraja: '⚠️ Yaxshilash kerak',
+      bonus:
+        `⚠️ <b>YAXSHILASH KERAK</b>\n` +
+        `<i>Natija o'rtacha. Keyingi oy\n` +
+        `yaxshiroq harakat qilsin.</i>`,
+    };
+  }
+  return {
+    emoji: '📉',
+    daraja: '❌ E\'tibor bering',
+    bonus:
+      `❌ <b>E'TIBOR BERING</b>\n` +
+      `<i>Past natija. Xodim bilan\n` +
+      `alohida suhbat o'tkazish tavsiya etiladi.</i>`,
+  };
 }
 
 function xodimReyting(fikrlar: Feedback[]): XodimStat[] {
