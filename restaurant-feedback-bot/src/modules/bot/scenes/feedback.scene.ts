@@ -192,18 +192,14 @@ async function saqlashVaYuborish(
 
   // Admin xabardorligi
   const ism = [tg.first_name, tg.last_name].filter(Boolean).join(' ');
-  const username = tg.username ? ` (@${tg.username})` : '';
-  const holat = sessiya.reyting! <= 2
-    ? '🔴 Past baho!'
-    : sessiya.reyting! === 3
-    ? '🟡 O\'rta baho'
-    : sessiya.reyting! === 5
-    ? '🟢 A\'lo baho!'
-    : '🟢 Yaxshi baho';
+  const username = tg.username ? ` · @${tg.username}` : '';
+  const r = sessiya.reyting!;
+  const holatBelgi = r <= 2 ? '🔴' : r === 3 ? '🟡' : '🟢';
+  const holatMatn = r <= 2 ? 'Past baho' : r === 3 ? "O'rta baho" : r === 4 ? 'Yaxshi baho' : "A'lo baho!";
 
   const kimHaqida = isTaom
-    ? '🍽 <b>Taom sifati</b>'
-    : `👨‍🍳 <b>${esc(sessiya.xodimIsmi!)}</b> (${esc(sessiya.xodimRoli!)})`;
+    ? `🍽 <b>Taom sifati</b>`
+    : `👨‍🍳 <b>${esc(sessiya.xodimIsmi!)}</b>  ·  ${esc(sessiya.xodimRoli!)}`;
 
   const vaqt = new Date().toLocaleTimeString('uz-UZ', {
     timeZone: 'Asia/Tashkent',
@@ -211,46 +207,41 @@ async function saqlashVaYuborish(
     minute: '2-digit',
   });
 
-  let adminXabar =
-    `🔔 <b>${holat}</b>\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `👤 ${esc(ism)}${username}\n` +
+  const adminXabar =
+    `${holatBelgi} <b>${holatMatn}</b>\n\n` +
+    `👤 <b>${esc(ism)}</b>${username}\n` +
     `${kimHaqida}\n` +
-    `${'⭐'.repeat(sessiya.reyting!)} <b>(${sessiya.reyting}/5)</b>\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n`;
-  if (izoh) adminXabar += `💬 <i>"${esc(izoh.substring(0, 200))}"</i>\n━━━━━━━━━━━━━━━━━━━━\n`;
-  adminXabar += `🕐 ${vaqt}`;
+    `${'⭐'.repeat(r)}  <b>${r} / 5</b>\n` +
+    (izoh ? `\n💬 <i>«${esc(izoh.substring(0, 200))}»</i>\n` : '') +
+    `\n🕐 ${vaqt}`;
 
   adminGaXabar(adminXabar).catch(() => {});
 
   // Foydalanuvchiga tasdiqlash
   const sarlavha = isTaom
     ? '🍽 <b>Taom sifati</b>'
-    : `👨‍🍳 <b>${esc(sessiya.xodimIsmi!)}</b>`;
+    : `👨‍🍳 <b>${esc(sessiya.xodimIsmi!)}</b>  ·  ${esc(sessiya.xodimRoli!)}`;
 
-  const yulduz = '⭐'.repeat(sessiya.reyting!);
+  const yulduz = '⭐'.repeat(r);
   const foydalanuvchiIsmi = esc(tg.first_name || 'Mehmon');
 
   let javob: string;
-  if (sessiya.reyting! <= 3) {
+  if (r <= 3) {
     javob =
-      `✅ <b>Fikringiz qabul qilindi, ${foydalanuvchiIsmi}!</b>\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `✅ <b>Fikringiz qabul qilindi!</b>\n\n` +
       `${sarlavha}\n` +
-      `${yulduz} (${sessiya.reyting}/5)\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `Izohingiz ko'rib chiqiladi va muammo\n` +
-      `imkon qadar tezroq hal qilinadi. 🙏\n\n` +
+      `${yulduz}  <b>${r} / 5</b>\n` +
+      (izoh ? `💬 <i>«${esc(izoh.substring(0, 100))}»</i>\n` : '') +
+      `\nIzohingiz ko'rib chiqiladi 🙏\n` +
       `💙 <b>Marvarid Restaurant</b>`;
   } else {
     javob =
-      `🎉 <b>Rahmat, ${foydalanuvchiIsmi}!</b>\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `🎉 <b>Rahmat, ${foydalanuvchiIsmi}!</b>\n\n` +
       `${sarlavha}\n` +
-      `${yulduz} (${sessiya.reyting}/5)\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `Ijobiy bahongiz xodimimizni rag'batlantiradi! 🌟\n\n` +
-      `💙 <b>Marvarid Restaurant</b> ga tashrif buyurganingiz\nuchun tashakkur!`;
+      `${yulduz}  <b>${r} / 5</b>\n` +
+      (izoh ? `💬 <i>«${esc(izoh.substring(0, 100))}»</i>\n` : '') +
+      `\nBahongiz xodimimizni rag'batlantiradi! 🌟\n` +
+      `💙 <b>Marvarid Restaurant</b>`;
   }
 
   await ctx.reply(javob, { parse_mode: 'HTML', ...ASOSIY_KLAVYATURA });
