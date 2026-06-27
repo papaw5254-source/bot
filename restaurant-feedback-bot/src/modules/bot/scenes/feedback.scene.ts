@@ -128,7 +128,7 @@ export function feedbackSahnaYaratish(
       );
     }
 
-    // 2. Reyting
+    // 2. Reyting — baholash yakunlanadi
     if (sessiya.qadam === 'reyting') {
       const reyting = REYTING_MAP[matn];
       if (!reyting) {
@@ -138,48 +138,7 @@ export function feedbackSahnaYaratish(
         );
       }
       sessiya.reyting = reyting;
-
-      if (reyting <= 3) {
-        sessiya.qadam = 'izoh_majburiy';
-        const reytingBelgisi = ['', '😞', '😐', '🙂'][reyting] || '';
-        return ctx.reply(
-          `${'⭐'.repeat(reyting)} <b>${reytingBelgisi}</b> baho qo'ydingiz\n` +
-          `━━━━━━━━━━━━━━━━━━━━\n\n` +
-          `✍️ <b>Muammoni tushuntiring</b>\n\n` +
-          `Sizning izohingiz vaziyatni tuzatishga yordam beradi.\n` +
-          `<i>Kamida 5 ta belgi yozing:</i>`,
-          { ...HTML, ...BEKOR_KLAVYATURA },
-        );
-      } else {
-        sessiya.qadam = 'izoh_ixtiyoriy';
-        const emoji = reyting === 5 ? '🤩' : '😊';
-        return ctx.reply(
-          `${'⭐'.repeat(reyting)} ${emoji} <b>Ajoyib baho!</b>\n` +
-          `━━━━━━━━━━━━━━━━━━━━\n\n` +
-          `💬 <b>Qo'shimcha fikr qoldiring</b> <i>(ixtiyoriy)</i>\n\n` +
-          `Nima yoqdi? Maqtovingiz xodimimizni rag'batlantiradi! 🌟`,
-          { ...HTML, ...OTKAZIB_YUBORISH_KLAVYATURA },
-        );
-      }
-    }
-
-    // 3. Majburiy izoh
-    if (sessiya.qadam === 'izoh_majburiy') {
-      if (matn.trim().length < 5) {
-        return ctx.reply(
-          `⚠️ Izoh juda qisqa.\n\n` +
-          `Kamida <b>5 ta belgi</b> yozing, iltimos:`,
-          HTML,
-        );
-      }
-      await saqlashVaYuborish(ctx, sessiya, matn.trim(), feedbackService, userService, adminGaXabar);
-      return;
-    }
-
-    // 4. Ixtiyoriy izoh
-    if (sessiya.qadam === 'izoh_ixtiyoriy') {
-      const izoh = matn === '➡️ O\'tkazib yuborish' ? undefined : matn.trim();
-      await saqlashVaYuborish(ctx, sessiya, izoh, feedbackService, userService, adminGaXabar);
+      await saqlashVaYuborish(ctx, sessiya, undefined, feedbackService, userService, adminGaXabar);
       return;
     }
   });
