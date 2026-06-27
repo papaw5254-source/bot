@@ -139,7 +139,7 @@ export class BotService implements OnModuleInit {
         `☎️ <b>Aloqa</b>\n\n` +
         `🏛 Marvarid Restaurant\n\n` +
         `📍 Xonqa tumani, O'zbekiston\n` +
-        `📞 +998 88 041 24 24\n` +
+        `📞 +998 88 511 51 44\n` +
         `🕐 Har kuni: 10:00 — 00:00\n\n` +
         `Savol yoki taklif bo'lsa — baholashda izoh qoldiring!`,
         { ...HTML, ...asosiyKlavyatura() },
