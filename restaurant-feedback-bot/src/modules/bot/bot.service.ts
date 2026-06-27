@@ -72,11 +72,9 @@ export class BotService implements OnModuleInit {
       const ism = escHtml(tg.first_name || 'Mehmon');
       await ctx.reply(
         `👋 Assalomu alaykum, <b>${ism}</b>!\n\n` +
-        `🏛 <b>Marvarid Restaurant</b> ga xush kelibsiz!\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `Bizni tanlagan va tashrif buyurganingiz uchun tashakkur! 🙏\n\n` +
-        `Xodimlarimiz va taomlarimiz haqidagi <b>fikringiz</b> bizni yaxshilanishga undaydi.`,
-        HTML,
+        `🍽 <b>Marvarid Restaurant</b> ga xush kelibsiz.\n\n` +
+        `Xodimlarimiz va taomlarimiz sifati haqida fikr bildiring — bu biz uchun juda muhim.`,
+        { ...HTML, ...asosiyKlavyatura() },
       );
 
       if (!ishVaqtimi()) {
@@ -98,57 +96,53 @@ export class BotService implements OnModuleInit {
       const user = await this.userService.telegramIdByTopish(ctx.from.id);
       if (!user) {
         return ctx.reply(
-          '⚠️ Avval /start buyrug\'ini yuboring.',
+          `⚠️ Avval /start buyrug'ini yuboring.`,
           { ...HTML, ...asosiyKlavyatura() },
         );
       }
 
-      const { malumot: fikrlar } = await this.feedbackService.barchasiniTopish({
-        page: 1,
-        limit: 20,
-      });
+      const { malumot: fikrlar } = await this.feedbackService.barchasiniTopish({ page: 1, limit: 20 });
       const mening = fikrlar.filter((f) => f.userId === user.id).slice(0, 5);
 
       if (mening.length === 0) {
         return ctx.reply(
-          `📋 <b>Sizning baholaringiz</b>\n` +
-          `━━━━━━━━━━━━━━━━━━━━\n\n` +
-          `😊 Hali hech kimni baholamagansiz.\n\n` +
-          `Xodimlarimiz va taomlarimiz haqida fikr bildiring —\n` +
-          `bu bepul va juda foydali! ✨`,
-          HTML,
+          `📋 <b>Sizning baholaringiz</b>\n\n` +
+          `Hali hech kimni baholamagansiz.\n\n` +
+          `⭐ Baholash tugmasini bosib, fikr bildiring!`,
+          { ...HTML, ...asosiyKlavyatura() },
         );
       }
 
       const satrlar = mening
         .map((f, i) => {
-          const kim = f.waiterName ? `👨‍🍳 <b>${escHtml(f.waiterName)}</b>` : `🍽 <b>Taom</b>`;
-          const izoh = f.comment ? `\n    💬 <i>${escHtml(f.comment.substring(0, 60))}</i>` : '';
-          return `${i + 1}. ${kim}  ${'⭐'.repeat(f.rating)} (${f.rating}/5)${izoh}`;
+          const kim = f.waiterName
+            ? `👨‍🍳 <b>${escHtml(f.waiterName)}</b>`
+            : `🍽 <b>Taom sifati</b>`;
+          const izoh = f.comment
+            ? `\n    💬 <i>«${escHtml(f.comment.substring(0, 60))}»</i>`
+            : '';
+          return `${i + 1}. ${kim}  ${'⭐'.repeat(f.rating)}  ${f.rating}/5${izoh}`;
         })
         .join('\n\n');
 
       await ctx.reply(
-        `📋 <b>Sizning so'nggi baholaringiz</b>\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `📋 <b>So'nggi baholaringiz</b>\n\n` +
         satrlar +
         `\n\n💙 Fikr-mulohazalaringiz uchun rahmat!`,
-        HTML,
+        { ...HTML, ...asosiyKlavyatura() },
       );
     });
 
     // Aloqa
     this.bot.hears('📞 Aloqa', async (ctx) => {
       await ctx.reply(
-        `📞 <b>Bog'lanish ma'lumotlari</b>\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `🏛 <b>Marvarid Restaurant</b>\n\n` +
-        `📍 <b>Manzil:</b>\nXonqa tumani, O'zbekiston\n\n` +
-        `☎️ <b>Telefon:</b>\n+998 88 041 24 24\n\n` +
-        `⏰ <b>Ish vaqti:</b>\nHar kuni: 10:00 — 00:00\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `💬 Muammo yoki taklif bo'lsa — xodimni baholab izoh qoldiring!`,
-        HTML,
+        `☎️ <b>Aloqa</b>\n\n` +
+        `🏛 Marvarid Restaurant\n\n` +
+        `📍 Xonqa tumani, O'zbekiston\n` +
+        `📞 +998 88 041 24 24\n` +
+        `🕐 Har kuni: 10:00 — 00:00\n\n` +
+        `Savol yoki taklif bo'lsa — baholashda izoh qoldiring!`,
+        { ...HTML, ...asosiyKlavyatura() },
       );
     });
 
@@ -158,21 +152,19 @@ export class BotService implements OnModuleInit {
         ? `\n\n🔐 <b>Admin buyruqlari:</b>\n/hisobot — Hisobotlarni ko'rish\n/qr — QR kod yaratish`
         : '';
       await ctx.reply(
-        `📖 <b>Yordam</b>\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `<b>Asosiy tugmalar:</b>\n` +
-        `⭐ Baholash — Xodim yoki taomni baholang\n` +
-        `📋 Mening baholarim — So'nggi baholaringiz\n` +
-        `📞 Aloqa — Bog'lanish ma'lumotlari` +
+        `📖 <b>Yordam</b>\n\n` +
+        `⭐ <b>Baholash</b> — xodim yoki taomni baholang\n` +
+        `📋 <b>Mening baholarim</b> — so'nggi baholaringiz\n` +
+        `📞 <b>Aloqa</b> — bog'lanish ma'lumotlari` +
         adminQator,
-        HTML,
+        { ...HTML, ...asosiyKlavyatura() },
       );
     });
 
     // /qr — faqat admin
     this.bot.command('qr', async (ctx) => {
       if (ctx.from.id !== this.adminTelegramId) {
-        return ctx.reply('⛔️ Bu buyruq faqat admin uchun.', HTML);
+        return ctx.reply('⛔ Bu buyruq faqat admin uchun.', HTML);
       }
       try {
         const botInfo = await this.bot.telegram.getMe();
@@ -185,36 +177,37 @@ export class BotService implements OnModuleInit {
           { source: buf, filename: 'marvarid_qr.png' },
           {
             caption:
-              `🍽 <b>Marvarid Restaurant</b>\n` +
-              `━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `🍽 <b>Marvarid Restaurant</b>\n\n` +
               `📱 QR kodni skanerlang va xodimni baholang!\n\n` +
-              `🖨 Chop etib har bir stolga qo'ying.\n` +
-              `Mehmonlar siz haqingizda fikr bildiradi!`,
+              `Chop etib har bir stolga qo'ying — mehmonlar fikr bildiradi.`,
             parse_mode: 'HTML',
           },
         );
       } catch (err: any) {
-        await ctx.reply(`❌ QR yaratishda xato: <code>${escHtml(err?.message || 'Noma\'lum xato')}</code>`, HTML);
+        await ctx.reply(
+          `❌ QR yaratishda xato yuz berdi.\n\n<code>${escHtml(err?.message || 'Noma\'lum xato')}</code>`,
+          HTML,
+        );
       }
     });
 
     // /hisobot — faqat admin
     this.bot.command('hisobot', async (ctx) => {
       if (ctx.from.id !== this.adminTelegramId) {
-        return ctx.reply('⛔️ Bu buyruq faqat admin uchun.', HTML);
+        return ctx.reply('⛔ Bu buyruq faqat admin uchun.', HTML);
       }
       await ctx.reply('⏳ Hisobotlar tayyorlanmoqda...', HTML);
       try {
         const kunlik = await this.reportService.kunlikMatnYaratish();
         await ctx.reply(kunlik, HTML);
       } catch (err: any) {
-        await ctx.reply(`❌ Kunlik hisobot xatosi: <code>${escHtml(err?.message)}</code>`, HTML);
+        await ctx.reply(`❌ Kunlik hisobot yuborilmadi.\n\n<code>${escHtml(err?.message)}</code>`, HTML);
       }
       try {
         const oylik = await this.reportService.oylikMatnYaratish();
         await ctx.reply(oylik, HTML);
       } catch (err: any) {
-        await ctx.reply(`❌ Oylik hisobot xatosi: <code>${escHtml(err?.message)}</code>`, HTML);
+        await ctx.reply(`❌ Oylik hisobot yuborilmadi.\n\n<code>${escHtml(err?.message)}</code>`, HTML);
       }
     });
 
@@ -222,9 +215,7 @@ export class BotService implements OnModuleInit {
     this.bot.on('message', async (ctx) => {
       try {
         await ctx.reply(
-          `🤔 Tushunmadim.\n\n` +
-          `Iltimos, pastdagi tugmalardan foydalaning\n` +
-          `yoki /start buyrug'ini yuboring.`,
+          `🤔 Tushunmadim.\n\nPastdagi tugmalardan foydalaning.`,
           { ...HTML, ...asosiyKlavyatura() },
         );
       } catch { /* foydalanuvchi botni bloklagan */ }
@@ -263,13 +254,8 @@ function ishVaqtimi(): boolean {
 
 function yopiqXabar(): string {
   return (
-    `🌙 <b>Marvarid restoran hozir yopiq</b>\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `⏰ <b>Ish vaqti:</b>\n` +
-    `Har kuni: 10:00 — 00:00\n\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `😊 Fikringiz biz uchun juda muhim!\n` +
-    `Ish vaqtida qaytib keling, baholashingizni kutamiz.\n\n` +
-    `🙏 Rahmat!`
+    `🌙 <b>Restoran hozir yopiq</b>\n\n` +
+    `🕐 Ish vaqti:  10:00 — 00:00\n\n` +
+    `Ish vaqtida qaytib keling, sizni kutamiz 😊`
   );
 }

@@ -40,7 +40,6 @@ export class ReportService {
     await this.adminGaYuborish(matn);
   }
 
-  // ─── Kunlik matn ─────────────────────────────────────────────
   async kunlikMatnYaratish(): Promise<string> {
     const bugun = new Date();
     bugun.setHours(0, 0, 0, 0);
@@ -57,9 +56,8 @@ export class ReportService {
 
     if (fikrlar.length === 0) {
       return (
-        `📊 <b>KUNLIK HISOBOT</b>\n` +
-        `📅 ${sana} — 🏛 Marvarid Restaurant\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `📊 <b>Kunlik hisobot</b>\n\n` +
+        `📅 ${sana}  ·  Marvarid Restaurant\n\n` +
         `📭 Bugun hech qanday fikr qoldirilmadi.`
       );
     }
@@ -69,15 +67,13 @@ export class ReportService {
     const qoniqarli = fikrlar.filter((f) => f.rating >= 4).length;
     const pastSoni = fikrlar.filter((f) => f.rating <= 3).length;
     const foiz = Math.round((qoniqarli / jami) * 100);
-
     const counts = [1, 2, 3, 4, 5].map((r) => fikrlar.filter((f) => f.rating === r).length);
 
-    // Kategoriyalar
     const kategoriyalar = [
-      { key: 'taom', nom: '🍽 Taom   ' },
-      { key: 'xizmat', nom: '👨‍🍳 Xizmat' },
-      { key: 'muhit', nom: '🏠 Muhit  ' },
-      { key: 'narx', nom: '💰 Narx   ' },
+      { key: 'taom',   nom: '🍽 Taom    ' },
+      { key: 'xizmat', nom: '👨‍🍳 Xizmat ' },
+      { key: 'muhit',  nom: '🏠 Muhit   ' },
+      { key: 'narx',   nom: '💰 Narx    ' },
     ].map(({ key, nom }) => {
       const k = fikrlar.filter((f) => f.category === key);
       if (k.length === 0) return null;
@@ -85,21 +81,16 @@ export class ReportService {
       return `${nom}  ⭐ <b>${or}</b>  (${k.length} ta)`;
     }).filter(Boolean);
 
-    // Bugungi eng yaxshi xodim
     const bugunXodim = xodimReyting(fikrlar);
 
     let xabar =
-      `📊 <b>KUNLIK HISOBOT</b>\n` +
-      `📅 <b>${sana}</b> — 🏛 Marvarid Restaurant\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
-
+      `📊 <b>Kunlik hisobot</b>\n\n` +
+      `📅 <b>${sana}</b>  ·  Marvarid Restaurant\n\n` +
       `${yulduzKorsatish(ortacha)}  <b>${ortacha.toFixed(1)} / 5.0</b>\n\n` +
-
-      `📝 Jami fikrlar: <b>${jami} ta</b>\n` +
-      `✅ Qoniqarli (4-5⭐): <b>${qoniqarli} ta — ${foiz}%</b>\n` +
-      `⚠️ Past baholar (1-3⭐): <b>${pastSoni} ta</b>\n\n` +
-
-      `📈 <b>Baholar taqsimoti:</b>\n` +
+      `📝 Jami:  <b>${jami} ta</b>\n` +
+      `✅ Yaxshi (4-5⭐):  <b>${qoniqarli} ta — ${foiz}%</b>\n` +
+      `⚠️ Past (1-3⭐):  <b>${pastSoni} ta</b>\n\n` +
+      `📈 <b>Taqsimot:</b>\n` +
       `<code>` +
       `5⭐  ${bar(counts[4], jami)}  ${counts[4]} ta\n` +
       `4⭐  ${bar(counts[3], jami)}  ${counts[3]} ta\n` +
@@ -112,19 +103,16 @@ export class ReportService {
       xabar += `\n\n📂 <b>Kategoriyalar:</b>\n<code>${kategoriyalar.join('\n')}</code>`;
     }
 
-    // Eng yaxshi xodim bloki
     if (bugunXodim.length > 0) {
       const birinchi = bugunXodim[0];
       xabar +=
-        `\n\n🌟 <b>BUGUNGI ENG YAXSHI XODIM</b>\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `\n\n🌟 <b>Bugungi eng yaxshi xodim</b>\n\n` +
         `🏆 <b>${esc(birinchi.ismi)}</b>\n` +
         `   ⭐ <b>${birinchi.ortacha.toFixed(1)}</b> / 5.0` +
-        `  |  ${birinchi.soni} ta baho` +
-        `  |  ${birinchi.ijobiy}% ijobiy`;
+        `  ·  ${birinchi.soni} ta baho` +
+        `  ·  ${birinchi.ijobiy}% ijobiy`;
     }
 
-    // Past baholar izohlari
     const pastlar = fikrlar.filter((f) => f.rating <= 3 && f.comment).slice(0, 5);
     if (pastlar.length > 0) {
       xabar += `\n\n⚠️ <b>Diqqat talab qiluvchi sharhlar:</b>`;
@@ -133,7 +121,7 @@ export class ReportService {
           ? `👨‍🍳 <b>${esc(f.waiterName)}</b>`
           : `🍽 <b>Taom</b>`;
         xabar +=
-          `\n${i + 1}. ${kim} — ${'⭐'.repeat(f.rating)}\n` +
+          `\n\n${i + 1}. ${kim}  ${'⭐'.repeat(f.rating)}\n` +
           `    💬 <i>${esc(f.comment!.substring(0, 100))}</i>`;
       });
     }
@@ -141,7 +129,6 @@ export class ReportService {
     return xabar;
   }
 
-  // ─── Oylik matn ──────────────────────────────────────────────
   async oylikMatnYaratish(): Promise<string> {
     const bugun = new Date();
     const oyBoshi = new Date(bugun.getFullYear(), bugun.getMonth(), 1);
@@ -155,9 +142,8 @@ export class ReportService {
 
     if (fikrlar.length === 0) {
       return (
-        `📅 <b>OYLIK HISOBOT</b>\n` +
-        `🗓 ${oyNomi} — 🏛 Marvarid Restaurant\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `📅 <b>Oylik hisobot</b>\n\n` +
+        `🗓 ${oyNomi}  ·  Marvarid Restaurant\n\n` +
         `📭 Bu oy hech qanday fikr qoldirilmadi.`
       );
     }
@@ -167,14 +153,13 @@ export class ReportService {
     const qoniqarli = fikrlar.filter((f) => f.rating >= 4).length;
     const pastSoni = fikrlar.filter((f) => f.rating <= 3).length;
     const foiz = Math.round((qoniqarli / jami) * 100);
-
     const counts = [1, 2, 3, 4, 5].map((r) => fikrlar.filter((f) => f.rating === r).length);
 
     const kategoriyalar = [
-      { key: 'taom', nom: '🍽 Taom   ' },
-      { key: 'xizmat', nom: '👨‍🍳 Xizmat' },
-      { key: 'muhit', nom: '🏠 Muhit  ' },
-      { key: 'narx', nom: '💰 Narx   ' },
+      { key: 'taom',   nom: '🍽 Taom    ' },
+      { key: 'xizmat', nom: '👨‍🍳 Xizmat ' },
+      { key: 'muhit',  nom: '🏠 Muhit   ' },
+      { key: 'narx',   nom: '💰 Narx    ' },
     ].map(({ key, nom }) => {
       const k = fikrlar.filter((f) => f.category === key);
       if (k.length === 0) return null;
@@ -182,21 +167,16 @@ export class ReportService {
       return `${nom}  ⭐ <b>${or}</b>  (${k.length} ta)`;
     }).filter(Boolean);
 
-    // Xodimlar reytingi
     const xodimlar = xodimReyting(fikrlar);
 
     let xabar =
-      `📅 <b>OYLIK HISOBOT</b>\n` +
-      `🗓 <b>${oyNomi}</b> — 🏛 Marvarid Restaurant\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
-
+      `📅 <b>Oylik hisobot</b>\n\n` +
+      `🗓 <b>${oyNomi}</b>  ·  Marvarid Restaurant\n\n` +
       `${yulduzKorsatish(ortacha)}  <b>${ortacha.toFixed(1)} / 5.0</b>\n\n` +
-
-      `📝 Jami fikrlar: <b>${jami} ta</b>\n` +
-      `✅ Qoniqarli (4-5⭐): <b>${qoniqarli} ta — ${foiz}%</b>\n` +
-      `⚠️ Past baholar (1-3⭐): <b>${pastSoni} ta</b>\n\n` +
-
-      `📈 <b>Baholar taqsimoti:</b>\n` +
+      `📝 Jami:  <b>${jami} ta</b>\n` +
+      `✅ Yaxshi (4-5⭐):  <b>${qoniqarli} ta — ${foiz}%</b>\n` +
+      `⚠️ Past (1-3⭐):  <b>${pastSoni} ta</b>\n\n` +
+      `📈 <b>Taqsimot:</b>\n` +
       `<code>` +
       `5⭐  ${bar(counts[4], jami)}  ${counts[4]} ta\n` +
       `4⭐  ${bar(counts[3], jami)}  ${counts[3]} ta\n` +
@@ -206,14 +186,11 @@ export class ReportService {
       `</code>`;
 
     if (kategoriyalar.length > 0) {
-      xabar += `\n\n📂 <b>Kategoriyalar bo'yicha:</b>\n<code>${kategoriyalar.join('\n')}</code>`;
+      xabar += `\n\n📂 <b>Kategoriyalar:</b>\n<code>${kategoriyalar.join('\n')}</code>`;
     }
 
-    // Xodimlar reytingi
     if (xodimlar.length > 0) {
-      xabar += `\n\n👨‍🍳 <b>XODIMLAR REYTINGI</b>\n`;
-      xabar += `<i>Oylik bonus hisoblash uchun</i>\n`;
-      xabar += `━━━━━━━━━━━━━━━━━━━━\n`;
+      xabar += `\n\n👨‍🍳 <b>Xodimlar reytingi</b>\n<i>Oylik bonus hisoblash uchun</i>\n`;
 
       xodimlar.forEach((x, i) => {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
@@ -225,19 +202,17 @@ export class ReportService {
 
         xabar +=
           `\n${medal} <b>${esc(x.ismi)}</b>\n` +
-          `   ${yulduzKorsatish(x.ortacha)} <b>${x.ortacha.toFixed(1)}</b>\n` +
-          `   📊 ${x.soni} ta baho  |  ✅ ${x.ijobiy}% ijobiy\n` +
+          `   ${yulduzKorsatish(x.ortacha)}  <b>${x.ortacha.toFixed(1)}</b> / 5.0\n` +
+          `   📊 ${x.soni} ta baho  ·  ✅ ${x.ijobiy}% ijobiy\n` +
           `   ${bonus}\n`;
       });
 
-      // Oyning eng yaxshisi alohida ajratilsin
       const eng = xodimlar[0];
       xabar +=
-        `\n🏆 <b>OY CHAMPIONI: ${esc(eng.ismi)}</b>\n` +
-        `   ⭐ ${eng.ortacha.toFixed(1)} baho — ${eng.soni} ta sharh`;
+        `\n🏆 <b>Oy championi: ${esc(eng.ismi)}</b>\n` +
+        `   ⭐ ${eng.ortacha.toFixed(1)} baho  ·  ${eng.soni} ta sharh`;
     }
 
-    // Past baholar izohlari
     const pastlar = fikrlar.filter((f) => f.rating <= 3 && f.comment).slice(0, 5);
     if (pastlar.length > 0) {
       xabar += `\n\n⚠️ <b>Diqqat talab qiluvchi sharhlar:</b>`;
@@ -246,7 +221,7 @@ export class ReportService {
           ? `👨‍🍳 <b>${esc(f.waiterName)}</b>`
           : `🍽 <b>Taom</b>`;
         xabar +=
-          `\n${i + 1}. ${kim} — ${'⭐'.repeat(f.rating)}\n` +
+          `\n\n${i + 1}. ${kim}  ${'⭐'.repeat(f.rating)}\n` +
           `    💬 <i>${esc(f.comment!.substring(0, 100))}</i>`;
       });
     }
@@ -275,8 +250,6 @@ export class ReportService {
     }
   }
 }
-
-// ─── Yordamchi funksiyalar ────────────────────────────────────
 
 interface XodimStat {
   ismi: string;

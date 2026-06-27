@@ -17,13 +17,13 @@ interface FeedbackSessiya {
 }
 
 const XODIMLAR: Record<string, { ismi: string; roli: string; kategoriya: FeedbackCategory }> = {
-  '👩‍💼 Administrator — Xalima':  { ismi: 'Xalima',   roli: 'Administrator', kategoriya: FeedbackCategory.SERVICE },
-  '👨‍🍳 Ofitsiant — Amirxon':    { ismi: 'Amirxon',  roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
-  '👨‍🍳 Ofitsiant — Dilafruz':   { ismi: 'Dilafruz', roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
-  '👨‍🍳 Ofitsiant — Ortiqboy':   { ismi: 'Ortiqboy', roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
-  '👨‍🍳 Ofitsiant — Mansur':     { ismi: 'Mansur',   roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
-  '👨‍🍳 Ofitsiant — Yusufboy':   { ismi: 'Yusufboy', roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
-  '🍽 Taom sifati':               { ismi: '',         roli: 'Taom',          kategoriya: FeedbackCategory.FOOD },
+  '👩‍💼 Administrator — Xalima': { ismi: 'Xalima',   roli: 'Administrator', kategoriya: FeedbackCategory.SERVICE },
+  '👨‍🍳 Ofitsiant — Amirxon':   { ismi: 'Amirxon',  roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
+  '👨‍🍳 Ofitsiant — Dilafruz':  { ismi: 'Dilafruz', roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
+  '👨‍🍳 Ofitsiant — Ortiqboy':  { ismi: 'Ortiqboy', roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
+  '👨‍🍳 Ofitsiant — Mansur':    { ismi: 'Mansur',   roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
+  '👨‍🍳 Ofitsiant — Yusufboy':  { ismi: 'Yusufboy', roli: 'Ofitsiant',     kategoriya: FeedbackCategory.SERVICE },
+  '🍽 Taom sifati':              { ismi: '',         roli: 'Taom',          kategoriya: FeedbackCategory.FOOD },
 };
 
 const REYTING_MAP: Record<string, number> = {
@@ -51,16 +51,6 @@ const ASOSIY_KLAVYATURA = {
   },
 };
 
-const OTKAZIB_YUBORISH_KLAVYATURA = {
-  reply_markup: {
-    keyboard: [
-      [{ text: '➡️ O\'tkazib yuborish' }],
-      [{ text: '❌ Bekor qilish' }],
-    ],
-    resize_keyboard: true,
-  },
-};
-
 export function feedbackSahnaYaratish(
   feedbackService: FeedbackService,
   userService: UserService,
@@ -71,10 +61,8 @@ export function feedbackSahnaYaratish(
   sahna.enter(async (ctx) => {
     ctx.session.feedback = { qadam: 'xodim' } as FeedbackSessiya;
     await ctx.reply(
-      `👥 <b>Xodimni tanlang</b>\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `Sizga xizmat ko'rsatgan xodimni yoki\n` +
-      `baholamoqchi bo'lgan bo'limni tanlang:`,
+      `👥 <b>Kim haqida fikr bildirasiz?</b>\n\n` +
+      `Xodimni yoki bo'limni tanlang 👇`,
       { ...HTML, ...xodimlarKlavyaturasi() },
     );
   });
@@ -83,8 +71,7 @@ export function feedbackSahnaYaratish(
     ctx.session.feedback = undefined;
     await ctx.reply(
       `❌ <b>Bekor qilindi</b>\n\n` +
-      `Asosiy menyuga qaytdingiz.\n` +
-      `Istalgan vaqt yana baholashingiz mumkin ⭐`,
+      `Asosiy menyuga qaytdingiz.`,
       { ...HTML, ...ASOSIY_KLAVYATURA },
     );
     return ctx.scene.leave();
@@ -100,8 +87,7 @@ export function feedbackSahnaYaratish(
       const xodim = XODIMLAR[matn];
       if (!xodim) {
         return ctx.reply(
-          `⚠️ Iltimos, ro'yxatdan xodimni tanlang.\n\n` +
-          `Tugmalardan birini bosing 👇`,
+          `⚠️ Iltimos, ro'yxatdan xodimni tanlang.\n\nTugmalardan birini bosing 👇`,
           { ...HTML, ...xodimlarKlavyaturasi() },
         );
       }
@@ -111,19 +97,18 @@ export function feedbackSahnaYaratish(
       sessiya.kategoriya = xodim.kategoriya;
       sessiya.qadam = 'reyting';
 
-      const tanlovMatn = xodim.kategoriya === FeedbackCategory.FOOD
-        ? `🍽 <b>Taom sifatini baholang</b>`
-        : `👨‍🍳 <b>${esc(xodim.ismi)}</b> — ${esc(xodim.roli)}`;
+      const sarlavha = xodim.kategoriya === FeedbackCategory.FOOD
+        ? `🍽 <b>Taom sifati</b>`
+        : `👨‍🍳 <b>${esc(xodim.ismi)}</b>  ·  ${esc(xodim.roli)}`;
 
       return ctx.reply(
-        `${tanlovMatn}\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `${sarlavha}\n\n` +
         `⭐ Bahoni tanlang:\n\n` +
-        `1 — Yomon 😞\n` +
-        `2 — Qoniqarsiz 😐\n` +
-        `3 — O'rtacha 🙂\n` +
-        `4 — Yaxshi 😊\n` +
-        `5 — A'lo 🤩`,
+        `1  Yomon  😞\n` +
+        `2  Qoniqarsiz  😐\n` +
+        `3  O'rtacha  🙂\n` +
+        `4  Yaxshi  😊\n` +
+        `5  A'lo  🤩`,
         { ...HTML, ...reytingKlavyaturasi() },
       );
     }
@@ -133,7 +118,7 @@ export function feedbackSahnaYaratish(
       const reyting = REYTING_MAP[matn];
       if (!reyting) {
         return ctx.reply(
-          `⚠️ Iltimos, bahoni tugmadan tanlang 👇`,
+          `⚠️ Bahoni tugmadan tanlang 👇`,
           { ...HTML, ...reytingKlavyaturasi() },
         );
       }
@@ -142,9 +127,8 @@ export function feedbackSahnaYaratish(
 
       const emoji = reyting <= 2 ? '😞' : reyting === 3 ? '🙂' : reyting === 4 ? '😊' : '🤩';
       return ctx.reply(
-        `${'⭐'.repeat(reyting)} ${emoji} <b>Baho qabul qilindi</b>\n` +
-        `━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `✍️ <b>Izoh qoldiring:</b>`,
+        `${'⭐'.repeat(reyting)}  <b>${reyting} / 5</b>  ${emoji}\n\n` +
+        `✍️ Izoh yozing:`,
         { ...HTML, ...BEKOR_KLAVYATURA },
       );
     }
@@ -152,7 +136,10 @@ export function feedbackSahnaYaratish(
     // 3. Izoh — yakunlanadi
     if (sessiya.qadam === 'izoh') {
       if (matn.trim().length < 3) {
-        return ctx.reply(`⚠️ Izoh juda qisqa, iltimos yozing:`, HTML);
+        return ctx.reply(
+          `⚠️ Izoh juda qisqa.\n\nKamida 3 ta harf yozing:`,
+          HTML,
+        );
       }
       await saqlashVaYuborish(ctx, sessiya, matn.trim(), feedbackService, userService, adminGaXabar);
       return;
@@ -190,9 +177,8 @@ async function saqlashVaYuborish(
     waiterName: isTaom ? undefined : sessiya.xodimIsmi,
   });
 
-  // Admin xabardorligi
   const ism = [tg.first_name, tg.last_name].filter(Boolean).join(' ');
-  const username = tg.username ? ` · @${tg.username}` : '';
+  const username = tg.username ? `  ·  @${tg.username}` : '';
   const r = sessiya.reyting!;
   const holatBelgi = r <= 2 ? '🔴' : r === 3 ? '🟡' : '🟢';
   const holatMatn = r <= 2 ? 'Past baho' : r === 3 ? "O'rta baho" : r === 4 ? 'Yaxshi baho' : "A'lo baho!";
@@ -211,18 +197,16 @@ async function saqlashVaYuborish(
     `${holatBelgi} <b>${holatMatn}</b>\n\n` +
     `👤 <b>${esc(ism)}</b>${username}\n` +
     `${kimHaqida}\n` +
-    `${'⭐'.repeat(r)}  <b>${r} / 5</b>\n` +
-    (izoh ? `\n💬 <i>«${esc(izoh.substring(0, 200))}»</i>\n` : '') +
-    `\n🕐 ${vaqt}`;
+    `${'⭐'.repeat(r)}  <b>${r} / 5</b>` +
+    (izoh ? `\n\n💬 <i>«${esc(izoh.substring(0, 200))}»</i>` : '') +
+    `\n\n🕐 ${vaqt}`;
 
   adminGaXabar(adminXabar).catch(() => {});
 
-  // Foydalanuvchiga tasdiqlash
   const sarlavha = isTaom
     ? '🍽 <b>Taom sifati</b>'
     : `👨‍🍳 <b>${esc(sessiya.xodimIsmi!)}</b>  ·  ${esc(sessiya.xodimRoli!)}`;
 
-  const yulduz = '⭐'.repeat(r);
   const foydalanuvchiIsmi = esc(tg.first_name || 'Mehmon');
 
   let javob: string;
@@ -230,7 +214,7 @@ async function saqlashVaYuborish(
     javob =
       `✅ <b>Fikringiz qabul qilindi!</b>\n\n` +
       `${sarlavha}\n` +
-      `${yulduz}  <b>${r} / 5</b>\n` +
+      `${'⭐'.repeat(r)}  <b>${r} / 5</b>\n` +
       (izoh ? `💬 <i>«${esc(izoh.substring(0, 100))}»</i>\n` : '') +
       `\nIzohingiz ko'rib chiqiladi 🙏\n` +
       `💙 <b>Marvarid Restaurant</b>`;
@@ -238,7 +222,7 @@ async function saqlashVaYuborish(
     javob =
       `🎉 <b>Rahmat, ${foydalanuvchiIsmi}!</b>\n\n` +
       `${sarlavha}\n` +
-      `${yulduz}  <b>${r} / 5</b>\n` +
+      `${'⭐'.repeat(r)}  <b>${r} / 5</b>\n` +
       (izoh ? `💬 <i>«${esc(izoh.substring(0, 100))}»</i>\n` : '') +
       `\nBahongiz xodimimizni rag'batlantiradi! 🌟\n` +
       `💙 <b>Marvarid Restaurant</b>`;
