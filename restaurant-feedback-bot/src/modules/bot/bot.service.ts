@@ -187,7 +187,7 @@ export class BotService implements OnModuleInit {
 
     // /qr — faqat admin
     this.bot.command('qr', async (ctx) => {
-      if (ctx.from.id !== this.adminTelegramId) {
+      if (!this.adminIds.includes(ctx.from.id)) {
         return ctx.reply('⛔ Bu buyruq faqat admin uchun.', HTML);
       }
       try {
@@ -217,7 +217,7 @@ export class BotService implements OnModuleInit {
 
     // /hisobot — faqat admin
     this.bot.command('hisobot', async (ctx) => {
-      if (ctx.from.id !== this.adminTelegramId) {
+      if (!this.adminIds.includes(ctx.from.id)) {
         return ctx.reply('⛔ Bu buyruq faqat admin uchun.', HTML);
       }
       await ctx.reply('⏳ Hisobotlar tayyorlanmoqda...', HTML);
