@@ -64,6 +64,7 @@ export class BotService implements OnModuleInit {
           await this.bot.telegram.sendMessage(String(id), xabar, HTML).catch(() => {});
         }
       },
+      () => this.adminIds,
     );
     const sahna = new Scenes.Stage([feedbackSahna]);
     this.bot.use(session());
@@ -89,8 +90,6 @@ export class BotService implements OnModuleInit {
         `Xodimlarimiz va taomlarimiz sifati haqida fikr bildiring — bu biz uchun juda muhim.`,
         { ...HTML, ...klavyatura },
       );
-
-      await ctx.scene.enter(FEEDBACK_SAHNA_NOMI);
     });
 
     // Baholash

@@ -40,21 +40,20 @@ const BEKOR_KLAVYATURA = {
   },
 };
 
-const ASOSIY_KLAVYATURA = {
-  reply_markup: {
-    keyboard: [
-      [{ text: '⭐ Baholash' }, { text: '📋 Mening baholarim' }],
-      [{ text: '📞 Aloqa' }],
-    ],
-    resize_keyboard: true,
-    is_persistent: true,
-  },
-};
+function asosiyMenuKlavyatura(isAdmin: boolean) {
+  const rows: { text: string }[][] = [
+    [{ text: '⭐ Baholash' }, { text: '📋 Mening baholarim' }],
+    [{ text: '📞 Aloqa' }],
+  ];
+  if (isAdmin) rows.push([{ text: '📊 Kunlik hisobot' }, { text: '📅 Oylik hisobot' }]);
+  return { reply_markup: { keyboard: rows, resize_keyboard: true, is_persistent: true } };
+}
 
 export function feedbackSahnaYaratish(
   feedbackService: FeedbackService,
   userService: UserService,
   adminGaXabar: (xabar: string) => Promise<void>,
+  getAdminIds: () => number[],
 ): Scenes.BaseScene<any> {
   const sahna = new Scenes.BaseScene<any>(FEEDBACK_SAHNA_NOMI);
 
@@ -72,7 +71,7 @@ export function feedbackSahnaYaratish(
     await ctx.reply(
       `❌ <b>Bekor qilindi</b>\n\n` +
       `Asosiy menyuga qaytdingiz.`,
-      { ...HTML, ...ASOSIY_KLAVYATURA },
+      { ...HTML, ...asosiyMenuKlavyatura(getAdminIds().includes(ctx.from.id)) },
     );
     return ctx.scene.leave();
   });
@@ -141,7 +140,7 @@ export function feedbackSahnaYaratish(
           HTML,
         );
       }
-      await saqlashVaYuborish(ctx, sessiya, matn.trim(), feedbackService, userService, adminGaXabar);
+      await saqlashVaYuborish(ctx, sessiya, matn.trim(), feedbackService, userService, adminGaXabar, getAdminIds);
       return;
     }
   });
@@ -156,6 +155,7 @@ async function saqlashVaYuborish(
   feedbackService: FeedbackService,
   userService: UserService,
   adminGaXabar: (xabar: string) => Promise<void>,
+  getAdminIds: () => number[],
 ) {
   const tg = ctx.from!;
 
@@ -228,7 +228,7 @@ async function saqlashVaYuborish(
       `💙 <b>Marvarid Restaurant</b>`;
   }
 
-  await ctx.reply(javob, { parse_mode: 'HTML', ...ASOSIY_KLAVYATURA });
+  await ctx.reply(javob, { parse_mode: 'HTML', ...asosiyMenuKlavyatura(getAdminIds().includes(tg.id)) });
   ctx.session.feedback = undefined;
   return ctx.scene.leave();
 }
