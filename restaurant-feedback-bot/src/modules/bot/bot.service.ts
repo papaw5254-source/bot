@@ -95,6 +95,7 @@ export class BotService implements OnModuleInit {
 
     // Baholash
     this.bot.hears('⭐ Baholash', async (ctx) => {
+      if (!ishVaqtimi()) return ctx.reply(yopiqXabar(), HTML);
       await ctx.scene.enter(FEEDBACK_SAHNA_NOMI);
     });
 
@@ -278,5 +279,25 @@ export class BotService implements OnModuleInit {
     process.once('SIGINT', () => this.bot.stop('SIGINT'));
     process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
   }
+}
+
+function ishVaqtimi(): boolean {
+  const soat = new Date().toLocaleTimeString('uz-UZ', {
+    timeZone: 'Asia/Tashkent',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const [h, m] = soat.split(':').map(Number);
+  const daqiqa = h * 60 + m;
+  return daqiqa >= 10 * 60; // 10:00 dan 00:00 gacha
+}
+
+function yopiqXabar(): string {
+  return (
+    `🌙 <b>Restoran hozir yopiq</b>\n\n` +
+    `🕐 Ish vaqti:  10:00 — 00:00\n\n` +
+    `Ish vaqtida qaytib keling, sizni kutamiz 😊`
+  );
 }
 
