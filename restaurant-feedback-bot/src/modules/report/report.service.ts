@@ -16,7 +16,6 @@ export class ReportService {
     private readonly botService: BotService,
   ) {}
 
-  @Cron('30 23 * * *', { timeZone: 'Asia/Tashkent' })
   async kunlikHisobot() {
     this.logger.log('Kunlik hisobot yuborilmoqda...');
     const matn = await this.kunlikMatnYaratish();
