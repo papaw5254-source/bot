@@ -158,6 +158,18 @@ export class BotService implements OnModuleInit {
       );
     });
 
+    // /whoami — debug uchun
+    this.bot.command('whoami', async (ctx) => {
+      const id = ctx.from.id;
+      const isAdmin = this.adminIds.includes(id);
+      await ctx.reply(
+        `🆔 Sizning Telegram ID: <code>${id}</code>\n` +
+        `👮 Admin: <b>${isAdmin ? 'Ha ✅' : 'Yo\'q ❌'}</b>\n` +
+        `📋 Admin IDs: <code>${this.adminIds.join(', ')}</code>`,
+        HTML,
+      );
+    });
+
     // /yordam
     this.bot.command('yordam', async (ctx) => {
       const adminQator = this.adminIds.includes(ctx.from.id)
