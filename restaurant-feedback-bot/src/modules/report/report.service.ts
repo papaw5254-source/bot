@@ -23,12 +23,13 @@ export class ReportService {
     await this.adminGaYuborish(matn);
   }
 
-  @Cron('0 20 28-31 * *', { timeZone: 'Asia/Tashkent' })
+  @Cron('0 20 27-30 * *', { timeZone: 'Asia/Tashkent' })
   async oylikHisobotTekshirish() {
     const bugun = new Date();
-    const ertasi = new Date(bugun);
-    ertasi.setDate(ertasi.getDate() + 1);
-    if (ertasi.getMonth() === bugun.getMonth()) return;
+    const ikkinchiKun = new Date(bugun);
+    ikkinchiKun.setDate(ikkinchiKun.getDate() + 2);
+    // Ertadan keyingi kun boshqa oy bo'lsa — ertaga oxirgi kun, bugun ikkinchi oxirgi kun
+    if (ikkinchiKun.getMonth() === bugun.getMonth()) return;
     await this.oylikHisobot();
   }
 
