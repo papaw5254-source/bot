@@ -21,6 +21,7 @@ export class BotService implements OnModuleInit {
   private readonly logger = new Logger(BotService.name);
   bot: Telegraf<any>;
   private adminTelegramId: number;
+  private adminIds: number[];
 
   constructor(
     private readonly configService: ConfigService,
@@ -39,6 +40,7 @@ export class BotService implements OnModuleInit {
     }
     await this.restaurantService.asosiyRestoranTayyorla();
     this.adminTelegramId = this.configService.get<number>('bot.adminTelegramId') || 0;
+    this.adminIds = this.configService.get<number[]>('bot.adminTelegramIds') || [this.adminTelegramId];
     this.bot = new Telegraf(token);
     this.sahnalarniSozlash();
     this.buyruqlarniSozlash();
@@ -50,7 +52,9 @@ export class BotService implements OnModuleInit {
       this.feedbackService,
       this.userService,
       async (xabar) => {
-        await this.bot.telegram.sendMessage(String(this.adminTelegramId), xabar, HTML);
+        for (const id of this.adminIds) {
+          await this.bot.telegram.sendMessage(String(id), xabar, HTML).catch(() => {});
+        }
       },
     );
     const sahna = new Scenes.Stage([feedbackSahna]);
@@ -148,7 +152,7 @@ export class BotService implements OnModuleInit {
 
     // /yordam
     this.bot.command('yordam', async (ctx) => {
-      const adminQator = ctx.from.id === this.adminTelegramId
+      const adminQator = this.adminIds.includes(ctx.from.id)
         ? `\n\n🔐 <b>Admin buyruqlari:</b>\n/hisobot — Hisobotlarni ko'rish\n/qr — QR kod yaratish`
         : '';
       await ctx.reply(

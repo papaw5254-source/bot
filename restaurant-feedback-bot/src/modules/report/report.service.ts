@@ -233,22 +233,24 @@ export class ReportService {
   }
 
   private async adminGaYuborish(xabar: string) {
-    const adminId = this.configService.get<number>('bot.adminTelegramId');
-    if (!adminId || !this.botService.bot) {
-      this.logger.warn('Admin Telegram ID yoki bot topilmadi');
+    const adminIds: number[] = this.configService.get<number[]>('bot.adminTelegramIds') || [];
+    if (adminIds.length === 0 || !this.botService.bot) {
+      this.logger.warn('Admin ID yoki bot topilmadi');
       return;
     }
-    try {
-      await this.botService.bot.telegram.sendMessage(String(adminId), xabar, {
-        parse_mode: 'HTML',
-      });
-    } catch (err: any) {
-      this.logger.error('Hisobot yuborishda xato: ' + err?.message);
+    for (const adminId of adminIds) {
       try {
-        const oddiy = xabar.replace(/<[^>]*>/g, '');
-        await this.botService.bot.telegram.sendMessage(String(adminId), oddiy);
-      } catch {
-        this.logger.error('Oddiy matn sifatida ham yuborib bo\'lmadi');
+        await this.botService.bot.telegram.sendMessage(String(adminId), xabar, {
+          parse_mode: 'HTML',
+        });
+      } catch (err: any) {
+        this.logger.error(`Hisobot ${adminId} ga yuborishda xato: ` + err?.message);
+        try {
+          const oddiy = xabar.replace(/<[^>]*>/g, '');
+          await this.botService.bot.telegram.sendMessage(String(adminId), oddiy);
+        } catch {
+          this.logger.error(`Oddiy matn sifatida ham ${adminId} ga yuborib bo\'lmadi`);
+        }
       }
     }
   }
