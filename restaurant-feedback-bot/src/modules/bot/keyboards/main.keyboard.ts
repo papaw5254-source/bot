@@ -8,6 +8,15 @@ export const asosiyKlavyatura = () =>
     .resize()
     .persistent();
 
+export const adminKlavyaturasi = () =>
+  Markup.keyboard([
+    ['⭐ Baholash', '📋 Mening baholarim'],
+    ['📞 Aloqa'],
+    ['📊 Kunlik hisobot', '📅 Oylik hisobot'],
+  ])
+    .resize()
+    .persistent();
+
 export const reytingKlavyaturasi = () =>
   Markup.keyboard([
     ['⭐ 1', '⭐⭐ 2', '⭐⭐⭐ 3'],

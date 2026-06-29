@@ -12,7 +12,7 @@ import { FeedbackService } from '../feedback/feedback.service';
 import { ReportService } from '../report/report.service';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { feedbackSahnaYaratish, FEEDBACK_SAHNA_NOMI } from './scenes/feedback.scene';
-import { asosiyKlavyatura } from './keyboards/main.keyboard';
+import { asosiyKlavyatura, adminKlavyaturasi } from './keyboards/main.keyboard';
 
 const HTML = { parse_mode: 'HTML' as const };
 
@@ -82,11 +82,12 @@ export class BotService implements OnModuleInit {
       });
 
       const ism = escHtml(tg.first_name || 'Mehmon');
+      const klavyatura = this.adminIds.includes(tg.id) ? adminKlavyaturasi() : asosiyKlavyatura();
       await ctx.reply(
         `👋 Assalomu alaykum, <b>${ism}</b>!\n\n` +
         `🍽 <b>Marvarid Restaurant</b> ga xush kelibsiz.\n\n` +
         `Xodimlarimiz va taomlarimiz sifati haqida fikr bildiring — bu biz uchun juda muhim.`,
-        { ...HTML, ...asosiyKlavyatura() },
+        { ...HTML, ...klavyatura },
       );
 
       if (!ishVaqtimi()) {
@@ -220,19 +221,20 @@ export class BotService implements OnModuleInit {
       if (!this.adminIds.includes(ctx.from.id)) {
         return ctx.reply('⛔ Bu buyruq faqat admin uchun.', HTML);
       }
-      await ctx.reply('⏳ Hisobotlar tayyorlanmoqda...', HTML);
-      try {
-        const kunlik = await this.reportService.kunlikMatnYaratish();
-        await ctx.reply(kunlik, HTML);
-      } catch (err: any) {
-        await ctx.reply(`❌ Kunlik hisobot yuborilmadi.\n\n<code>${escHtml(err?.message)}</code>`, HTML);
-      }
-      try {
-        const oylik = await this.reportService.oylikMatnYaratish();
-        await ctx.reply(oylik, HTML);
-      } catch (err: any) {
-        await ctx.reply(`❌ Oylik hisobot yuborilmadi.\n\n<code>${escHtml(err?.message)}</code>`, HTML);
-      }
+      await this.kunlikHisobotYuborish(ctx);
+      await this.oylikHisobotYuborish(ctx);
+    });
+
+    // 📊 Kunlik hisobot tugmasi
+    this.bot.hears('📊 Kunlik hisobot', async (ctx) => {
+      if (!this.adminIds.includes(ctx.from.id)) return;
+      await this.kunlikHisobotYuborish(ctx);
+    });
+
+    // 📅 Oylik hisobot tugmasi
+    this.bot.hears('📅 Oylik hisobot', async (ctx) => {
+      if (!this.adminIds.includes(ctx.from.id)) return;
+      await this.oylikHisobotYuborish(ctx);
     });
 
     // Noma'lum xabar
@@ -244,6 +246,26 @@ export class BotService implements OnModuleInit {
         );
       } catch { /* foydalanuvchi botni bloklagan */ }
     });
+  }
+
+  private async kunlikHisobotYuborish(ctx: any) {
+    await ctx.reply('⏳ Kunlik hisobot tayyorlanmoqda...', HTML);
+    try {
+      const matn = await this.reportService.kunlikMatnYaratish();
+      await ctx.reply(matn, HTML);
+    } catch (err: any) {
+      await ctx.reply(`❌ Kunlik hisobot xatosi.\n\n<code>${escHtml(err?.message)}</code>`, HTML);
+    }
+  }
+
+  private async oylikHisobotYuborish(ctx: any) {
+    await ctx.reply('⏳ Oylik hisobot tayyorlanmoqda...', HTML);
+    try {
+      const matn = await this.reportService.oylikMatnYaratish();
+      await ctx.reply(matn, HTML);
+    } catch (err: any) {
+      await ctx.reply(`❌ Oylik hisobot xatosi.\n\n<code>${escHtml(err?.message)}</code>`, HTML);
+    }
   }
 
   private botniIshgaTushirish() {
