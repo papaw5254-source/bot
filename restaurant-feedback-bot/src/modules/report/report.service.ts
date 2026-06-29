@@ -23,16 +23,6 @@ export class ReportService {
     await this.adminGaYuborish(matn);
   }
 
-  @Cron('0 20 27-30 * *', { timeZone: 'Asia/Tashkent' })
-  async oylikHisobotTekshirish() {
-    const bugun = new Date();
-    const ikkinchiKun = new Date(bugun);
-    ikkinchiKun.setDate(ikkinchiKun.getDate() + 2);
-    // Ertadan keyingi kun boshqa oy bo'lsa — ertaga oxirgi kun, bugun ikkinchi oxirgi kun
-    if (ikkinchiKun.getMonth() === bugun.getMonth()) return;
-    await this.oylikHisobot();
-  }
-
   async oylikHisobot() {
     this.logger.log('Oylik hisobot yuborilmoqda...');
     const matn = await this.oylikMatnYaratish();
