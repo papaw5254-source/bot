@@ -2,7 +2,6 @@ import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { ConfigService } from '@nestjs/config';
 import { Feedback } from '../feedback/entities/feedback.entity';
 import { BotService } from '../bot/bot.service';
 
@@ -15,7 +14,6 @@ export class ReportService {
     private readonly feedbackRepo: Repository<Feedback>,
     @Inject(forwardRef(() => BotService))
     private readonly botService: BotService,
-    private readonly configService: ConfigService,
   ) {}
 
   @Cron('30 23 * * *', { timeZone: 'Asia/Tashkent' })
@@ -206,7 +204,7 @@ export class ReportService {
 
       // Bonus g'olibi kartasi
       const eng = xodimlar[0];
-      const { emoji, daraja, bonus } = bonusDaraja(eng.ortacha, eng.ijobiy);
+      const { emoji, bonus } = bonusDaraja(eng.ortacha, eng.ijobiy);
 
       xabar +=
         `\n\n${emoji} <b>${oyNomi.toUpperCase()} — OY G'OLIBI</b>\n\n` +
@@ -233,7 +231,11 @@ export class ReportService {
   }
 
   private async adminGaYuborish(xabar: string) {
-    const adminIds: number[] = this.configService.get<number[]>('bot.adminTelegramIds') || [];
+    const rawIds = process.env.ADMIN_TELEGRAM_IDS || process.env.ADMIN_TELEGRAM_ID || '';
+    const adminIds: number[] = rawIds
+      .split(',')
+      .map((s) => parseInt(s.trim(), 10))
+      .filter((n) => n > 0);
     if (adminIds.length === 0 || !this.botService.bot) {
       this.logger.warn('Admin ID yoki bot topilmadi');
       return;

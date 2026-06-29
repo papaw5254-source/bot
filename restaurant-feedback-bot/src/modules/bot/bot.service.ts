@@ -40,7 +40,15 @@ export class BotService implements OnModuleInit {
     }
     await this.restaurantService.asosiyRestoranTayyorla();
     this.adminTelegramId = this.configService.get<number>('bot.adminTelegramId') || 0;
-    this.adminIds = this.configService.get<number[]>('bot.adminTelegramIds') || [this.adminTelegramId];
+    const rawIds = process.env.ADMIN_TELEGRAM_IDS || process.env.ADMIN_TELEGRAM_ID || '';
+    this.adminIds = rawIds
+      .split(',')
+      .map((s) => parseInt(s.trim(), 10))
+      .filter((n) => n > 0);
+    if (this.adminIds.length === 0 && this.adminTelegramId > 0) {
+      this.adminIds = [this.adminTelegramId];
+    }
+    this.logger.log(`Admin IDs: ${this.adminIds.join(', ')}`);
     this.bot = new Telegraf(token);
     this.sahnalarniSozlash();
     this.buyruqlarniSozlash();
